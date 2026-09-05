@@ -1,0 +1,28 @@
+[package]
+name = "poker_analyse"
+version = "0.1.0"
+edition = "2021"
+authors = ["Straussbikes"]
+description = "High-performance tournament poker decision & analytics engine"
+
+[lib]
+name = "poker_analyse"
+path = "src/lib.rs"
+
+[[bin]]
+name = "poker_cli"
+path = "src/main.rs"
+
+[dependencies]
+futures-util = "0.3.34"
+notify = "8.2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.53.1", features = ["full"] }
+tokio-tungstenite = "0.30.0"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"

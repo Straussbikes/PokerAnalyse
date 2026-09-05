@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokerAnalyse - Real-Time Heads-Up Tournament HUD & Session Auditor</title>
+  <meta name="description" content="High-performance real-time poker tournament decision HUD, 13x13 Bayesian range matrix heatmap, EV differential analytics, and post-game session auditor.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="dark-theme">
+  <!-- Top Navigation & Control Header -->
+  <header class="navbar glass-panel">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">POKER<span class="accent-text">ANALYSE</span></span>
+        <span class="brand-badge">PRO HUD v5.0</span>
+      </div>
+    </div>
+
+    <!-- View Switcher Tabs -->
+    <div class="view-tabs" role="tablist">
+      <button id="tab-live-hud" class="tab-btn active" role="tab" aria-selected="true">
+        <span class="tab-icon">⚡</span> Live Heads-Up HUD
+      </button>
+      <button id="tab-auditor" class="tab-btn" role="tab" aria-selected="false">
+        <span class="tab-icon">📊</span> Session Auditor & Reviewer
+      </button>
+    </div>
+
+    <!-- WS Connection & Actions -->
+    <div class="header-controls">
+      <div class="ws-connection-bar">
+        <span id="ws-status-indicator" class="status-indicator offline"></span>
+        <span id="ws-status-text" class="status-label">Connecting...</span>
+        <input type="text" id="ws-url-input" value="ws://127.0.0.1:9001" placeholder="ws://127.0.0.1:9001" title="WebSocket Server URL">
+        <button id="btn-ws-connect" class="btn btn-secondary btn-sm">Connect</button>
+      </div>
+      <button id="btn-simulate-hand" class="btn btn-primary btn-sm glow-btn">
+        <span class="btn-icon">▶</span> Simulate Live Hand
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="main-content">
+    
+    <!-- ======================================================== -->
+    <!-- VIEW 1: REAL-TIME HEADS-UP DASHBOARD (HUD)              -->
+    <!-- ======================================================== -->
+    <section id="view-live-hud" class="view-panel active">
+      
+      <!-- Interactive Evaluation & Step-by-Step Playback Controller -->
+      <div class="eval-playback-toolbar glass-panel">
+        <div class="playback-controls-group">
+          <span class="playback-title">AVALIAÇÃO DO BOT:</span>
+          <button id="btn-prev-step" class="btn btn-playback" title="Passo Anterior (Seta Esquerda)">
+            <span>⏮</span> Anterior
+          </button>
+          <button id="btn-next-step" class="btn btn-playback btn-playback-primary glow-btn" title="Passo Seguinte (Barra de Espaço ou Seta Direita)">
+            <span>⏭</span> <b>Passo Seguinte</b>
+          </button>
+          <button id="btn-toggle-play" class="btn btn-playback" title="Alternar Reprodução Automática">
+            <span id="play-icon">▶</span> <span id="play-text">Auto-Play</span>
+          </button>
+        </div>
+
+        <div class="playback-info-group">
+          <span id="step-counter-pill" class="playback-counter-badge">Decisão 1 / 16 • Mão #7001001 (Preflop)</span>
+          <span class="keyboard-hint">Atalhos: <kbd>Espaço</kbd> ou <kbd>→</kbd> avançar | <kbd>←</kbd> recuar</span>
+        </div>
+
+        <div class="playback-status-group">
+          <span id="playback-mode-badge" class="badge-playback-mode manual">⏸ PAUSADO (MODO MANUAL)</span>
+        </div>
+      </div>
+
+      <!-- Live Table Banner -->
+      <div class="table-banner glass-panel">
+        <div class="table-info-group">
+          <div class="meta-item">
+            <span class="meta-label">TOURNAMENT</span>
+            <span id="live-tourn-id" class="meta-value text-glow">#888999</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">HAND ID</span>
+            <span id="live-hand-id" class="meta-value font-mono">#7001003</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">STREET</span>
+            <span id="live-street-badge" class="badge street-badge street-turn">TURN</span>
+          </div>
+        </div>
+
+        <div class="pot-center-display">
+          <div class="pot-sub">CURRENT TOTAL POT</div>
+          <div class="pot-amount"><span class="chip-symbol">●</span> <span id="live-pot-amount">1,525</span> <span class="bb-unit">chips (30.5 BB)</span></div>
+        </div>
+
+        <div class="table-info-group right-align">
+          <div class="meta-item">
+            <span class="meta-label">CALL COST</span>
+            <span id="live-call-cost" class="meta-value text-accent font-mono">0 chips</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">HERO STACK</span>
+            <span id="live-hero-stack" class="meta-value font-mono">4,625 chips</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">BLINDS</span>
+            <span id="live-blinds-text" class="meta-value font-mono">25 / 50</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Table Surface: Hero Cards & Board Cards -->
+      <div class="poker-table-surface glass-panel">
+        <div class="surface-card-container">
+          <!-- Community Board Cards -->
+          <div class="card-strip-section">
+            <div class="section-tag">COMMUNITY BOARD</div>
+            <div id="board-cards-container" class="card-row">
+              <div class="poker-card card-hearts"><span class="card-rank">Q</span><span class="card-suit">♥</span></div>
+              <div class="poker-card card-hearts"><span class="card-rank">J</span><span class="card-suit">♥</span></div>
+              <div class="poker-card card-hearts"><span class="card-rank">T</span><span class="card-suit">♥</span></div>
+              <div class="poker-card card-spades"><span class="card-rank">2</span><span class="card-suit">♠</span></div>
+              <div class="poker-card card-placeholder"><span class="placeholder-dot">?</span></div>
+            </div>
+          </div>
+
+          <!-- Hero Hole Cards -->
+          <div class="card-strip-section hero-section">
+            <div class="section-tag highlight-hero">HERO HOLE CARDS</div>
+            <div id="hero-cards-container" class="card-row">
+              <div class="poker-card card-hearts hero-card"><span class="card-rank">A</span><span class="card-suit">♥</span></div>
+              <div class="poker-card card-hearts hero-card"><span class="card-rank">K</span><span class="card-suit">♥</span></div>
+            </div>
+            <div class="hand-eval-badge">Royal Flush Draw / Nut Straight</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytical HUD Grid: Range Heatmap (Left) + EV Card & Gauges (Right) -->
+      <div class="hud-analytics-grid">
+        
+        <!-- LEFT COLUMN: 13x13 RANGE HEATMAP -->
+        <div class="analytics-card glass-panel range-matrix-card">
+          <div class="card-header-bar">
+            <div class="header-title-group">
+              <h2 class="card-title">13x13 Range Matrix Heatmap</h2>
+              <span class="card-subtitle">169 Canonical Hand Groups & Combo Densities</span>
+            </div>
+            <div class="range-mode-toggle" role="group">
+              <button id="btn-range-hero" class="toggle-pill active">Hero Range</button>
+              <button id="btn-range-villain" class="toggle-pill">Villain (Bayesian)</button>
+            </div>
+          </div>
+
+          <div class="range-heatmap-wrapper">
+            <div id="range-grid-13x13" class="range-grid">
+              <!-- 13x13 dynamically populated by dashboard.js -->
+            </div>
+          </div>
+
+          <!-- Range Legend & Cell Inspector -->
+          <div class="range-footer">
+            <div class="gradient-legend">
+              <span class="legend-lbl">0% (Fold)</span>
+              <div class="gradient-bar"></div>
+              <span class="legend-lbl">100% (Pure Shove/Call)</span>
+            </div>
+            <div id="range-cell-inspector" class="cell-inspector">
+              <span class="inspector-hand">AKs</span>
+              <span class="inspector-details">4 combos | Weight: 100.0% | Premium Broadway</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: EV DIFFERENTIAL & DECISION SOLVER -->
+        <div class="analytics-card glass-panel ev-differential-card">
+          <div class="card-header-bar">
+            <div class="header-title-group">
+              <h2 class="card-title">Real-Time EV Differential Solver</h2>
+              <span class="card-subtitle">Argmax EV Action Comparison & Analytical Justification</span>
+            </div>
+            <div class="decision-badge" id="recommended-action-badge">
+              RECOMMENDED: <span id="rec-action-name">BET 75%</span>
+            </div>
+          </div>
+
+          <!-- Comparative Action Bars -->
+          <div id="ev-action-bars" class="action-bars-list">
+            <!-- Dynamically populated by dashboard.js -->
+          </div>
+
+          <!-- Bottom Metric Dials: Pot Odds vs Equity -->
+          <div class="gauges-split-container">
+            
+            <!-- Circular Gauge: Hero Equity vs Required Pot Odds -->
+            <div class="gauge-sub-card">
+              <div class="gauge-header">POT ODDS VS REQUIRED EQUITY</div>
+              <div class="circular-gauge-container">
+                <svg viewBox="0 0 160 160" class="dial-svg">
+                  <!-- Background Arc -->
+                  <circle class="dial-bg" cx="80" cy="80" r="65"></circle>
+                  <!-- Break-even Threshold Marker Arc -->
+                  <circle id="gauge-breakeven-arc" class="dial-breakeven" cx="80" cy="80" r="65" stroke-dasharray="408.4" stroke-dashoffset="300"></circle>
+                  <!-- Hero Equity Value Arc -->
+                  <circle id="gauge-equity-arc" class="dial-equity" cx="80" cy="80" r="65" stroke-dasharray="408.4" stroke-dashoffset="120"></circle>
+                </svg>
+                <div class="dial-center-content">
+                  <div id="dial-equity-pct" class="dial-pct text-emerald">88.5%</div>
+                  <div class="dial-sub-text">HERO EQUITY</div>
+                </div>
+              </div>
+              <div class="dial-comparison-footer">
+                <span class="foot-col">Pot Odds: <b id="dial-pot-odds-val">24.2%</b></span>
+                <span class="foot-col margin-positive" id="dial-margin-val">+64.3% Margin</span>
+              </div>
+            </div>
+
+            <!-- Analytical Solver Reasoning Box -->
+            <div class="reasoning-sub-card">
+              <div class="reasoning-header">SOLVER RATIONALE & ICM RISK BUFFER</div>
+              <div class="reasoning-body font-mono" id="solver-reasoning-text">
+                Action Bet(600.0) yields optimal expected value of +1,016.0 chips.
+                Hero holds 88.5% equity against Villain's calling range.
+                Pot odds require 24.2% equity; ICM Risk Premium buffer +3.0%.
+                Recommendation: Value bet 75% pot to maximize villain call frequency.
+              </div>
+              <div class="icm-status-pills">
+                <span class="status-chip chip-green">ICM Buffer: +3.0%</span>
+                <span class="status-chip chip-blue">Villain Fold Freq: 28.0%</span>
+                <span class="status-chip chip-gold">Equity Called: 85.0%</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Real-Time Event Stream Ticker -->
+      <div class="live-event-ticker glass-panel">
+        <div class="ticker-label"><span class="pulse-dot"></span> LIVE EVENT BUS STREAM</div>
+        <div id="event-ticker-content" class="ticker-scroll font-mono">
+          [Hand #7001003] Preflop: Hero raises 100 to 150 | SmallBlindGuy calls 100 | Flop [Qh Jh Th] dealt | SmallBlindGuy checks | Hero bets 200 | SmallBlindGuy calls 200 | Turn [2s] dealt...
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 2: POST-GAME SESSION AUDITOR & REVIEWER            -->
+    <!-- ======================================================== -->
+    <section id="view-auditor" class="view-panel">
+      
+      <!-- Session Controls Bar -->
+      <div class="auditor-controls-bar glass-panel">
+        <div class="file-uploader-group">
+          <input type="file" id="audit-file-input" accept=".txt,.log" class="hidden-file-input">
+          <button id="btn-trigger-upload" class="btn btn-secondary">
+            <span class="btn-icon">📁</span> Load Tournament Log
+          </button>
+          <button id="btn-load-sample" class="btn btn-secondary">
+            <span class="btn-icon">⚡</span> Load Sample Session
+          </button>
+          <span id="auditor-file-name" class="current-file-label">sample_tournament.txt</span>
+        </div>
+
+        <div class="auditor-actions-group">
+          <button id="btn-export-audit-json" class="btn btn-outline btn-sm">
+            <span class="btn-icon">⬇</span> Export JSON Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Session KPI Metric Cards -->
+      <div class="session-kpi-grid">
+        <div class="kpi-card glass-panel">
+          <div class="kpi-label">TOTAL HANDS ANALYZED</div>
+          <div id="kpi-total-hands" class="kpi-value">3</div>
+          <div class="kpi-sub"><span id="kpi-hero-hands">3</span> Hero Played</div>
+        </div>
+
+        <div class="kpi-card glass-panel">
+          <div class="kpi-label">DECISION NODES</div>
+          <div id="kpi-total-decisions" class="kpi-value">7</div>
+          <div class="kpi-sub">Every Hero Street Decision</div>
+        </div>
+
+        <div class="kpi-card glass-panel highlight-leak">
+          <div class="kpi-label">CUMULATIVE EV LOSS</div>
+          <div id="kpi-cumulative-bb-loss" class="kpi-value text-crimson">-46.83 BB</div>
+          <div class="kpi-sub"><span id="kpi-cumulative-chips">-2,341.32</span> chips</div>
+        </div>
+
+        <div class="kpi-card glass-panel">
+          <div class="kpi-label">LEAKS & BLUNDERS</div>
+          <div class="kpi-split-stat">
+            <div class="stat-blunder"><span id="kpi-blunder-count">1</span> Blunder</div>
+            <div class="stat-mistake"><span id="kpi-mistake-count">1</span> Mistake</div>
+            <div class="stat-inaccuracy"><span id="kpi-inaccuracy-count">5</span> Inaccuracies</div>
+          </div>
+          <div class="kpi-sub">Severity > 0.25 BB</div>
+        </div>
+
+        <div class="kpi-card glass-panel">
+          <div class="kpi-label">LEAK-FREE ACCURACY</div>
+          <div id="kpi-accuracy-rate" class="kpi-value text-emerald">0.0%</div>
+          <div class="kpi-sub">Solver Alignment Rate</div>
+        </div>
+      </div>
+
+      <!-- Session EV Leak Progression Chart -->
+      <div class="auditor-chart-card glass-panel">
+        <div class="card-header-bar">
+          <div class="header-title-group">
+            <h2 class="card-title">Cumulative EV Loss Timeline</h2>
+            <span class="card-subtitle">Stepped Cumulative Big Blind Leak Over Tournament Hand History</span>
+          </div>
+        </div>
+        <div class="chart-canvas-container">
+          <canvas id="audit-timeline-canvas" width="1100" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Filterable Decisions & Leaks Table -->
+      <div class="auditor-table-card glass-panel">
+        <div class="card-header-bar">
+          <div class="header-title-group">
+            <h2 class="card-title">Audited Decisions & Mistakes</h2>
+            <span class="card-subtitle">Click any decision row to inspect full board & solver breakdown</span>
+          </div>
+          <div class="table-filter-group">
+            <button class="filter-pill active" data-filter="all">All (7)</button>
+            <button class="filter-pill filter-blunder" data-filter="Blunder">Blunders (1)</button>
+            <button class="filter-pill filter-mistake" data-filter="Mistake">Mistakes (1)</button>
+            <button class="filter-pill filter-inaccuracy" data-filter="Inaccuracy">Inaccuracies (5)</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="audit-data-table">
+            <thead>
+              <tr>
+                <th>HAND ID</th>
+                <th>STREET</th>
+                <th>HERO CARDS</th>
+                <th>BOARD</th>
+                <th>ACTION TAKEN</th>
+                <th>RECOMMENDED</th>
+                <th>CHIP EV LOSS</th>
+                <th>BB LOSS</th>
+                <th>SEVERITY</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-body">
+              <!-- Dynamically populated by dashboard.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Inspection Modal for Detailed Decision Review -->
+  <div id="decision-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-panel">
+      <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">Hand #7001003 Decision Inspection</h3>
+        <button id="btn-close-modal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-content">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

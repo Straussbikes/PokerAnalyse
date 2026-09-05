@@ -1,0 +1,63 @@
+PokerStars Hand #7001001: Tournament #888999, $50+$5 USD Hold'em No Limit - Level I (25/50) - 2026/09/05
+Table '888999 1' 9-max Seat #1 is the button
+Seat 1: ButtonUser (5000 in chips)
+Seat 2: SmallBlindGuy (5000 in chips)
+Seat 3: BigBlindGuy (5000 in chips)
+Seat 4: Hero (5000 in chips)
+SmallBlindGuy: posts small blind 25
+BigBlindGuy: posts big blind 50
+*** HOLE CARDS ***
+Dealt to Hero [Ac As]
+Hero: raises 100 to 150
+ButtonUser: folds
+SmallBlindGuy: folds
+BigBlindGuy: calls 100
+*** FLOP *** [Kd 7h 2c]
+BigBlindGuy: checks
+Hero: bets 200
+BigBlindGuy: folds
+*** SUMMARY ***
+Total pot 325 | Rake 0
+
+PokerStars Hand #7001002: Tournament #888999, $50+$5 USD Hold'em No Limit - Level I (25/50) - 2026/09/05
+Table '888999 1' 9-max Seat #2 is the button
+Seat 1: ButtonUser (4850 in chips)
+Seat 2: SmallBlindGuy (4975 in chips)
+Seat 3: BigBlindGuy (4750 in chips)
+Seat 4: Hero (5425 in chips)
+Hero: posts small blind 25
+ButtonUser: posts big blind 50
+*** HOLE CARDS ***
+Dealt to Hero [7h 2c]
+SmallBlindGuy: folds
+Hero: folds
+ButtonUser: checks
+*** SUMMARY ***
+Total pot 75 | Rake 0
+
+PokerStars Hand #7001003: Tournament #888999, $50+$5 USD Hold'em No Limit - Level I (25/50) - 2026/09/05
+Table '888999 1' 9-max Seat #3 is the button
+Seat 1: ButtonUser (4850 in chips)
+Seat 2: SmallBlindGuy (4975 in chips)
+Seat 3: BigBlindGuy (4750 in chips)
+Seat 4: Hero (5400 in chips)
+ButtonUser: posts small blind 25
+SmallBlindGuy: posts big blind 50
+*** HOLE CARDS ***
+Dealt to Hero [Ah Kh]
+Hero: raises 100 to 150
+ButtonUser: folds
+SmallBlindGuy: calls 100
+*** FLOP *** [Qh Jh Th]
+SmallBlindGuy: checks
+Hero: bets 200
+SmallBlindGuy: calls 200
+*** TURN *** [Qh Jh Th] [2s]
+SmallBlindGuy: checks
+Hero: bets 400
+SmallBlindGuy: calls 400
+*** RIVER *** [Qh Jh Th 2s] [3d]
+SmallBlindGuy: checks
+Hero: folds
+*** SUMMARY ***
+Total pot 1525 | Rake 0
